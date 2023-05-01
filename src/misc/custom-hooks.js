@@ -1,5 +1,6 @@
 import { useCallback, useState, useEffect } from 'react';
 import { database } from './firebase';
+import { useRef } from 'react';
 
 export function useModalState(defaultValue = false) {
   const [isOpen, setIsOpen] = useState(defaultValue);
@@ -44,4 +45,28 @@ export function usePresence(uid) {
       userStatusRef.off();
     };
   }, [uid]);
+
+  return presence;
+}
+
+export function useHover() {
+  const [value, setValue] = useState(false);
+  const ref = useRef(null);
+  const handleMouseOver = () => setValue(true);
+  const handleMouseOut = () => setValue(false);
+  useEffect(
+    () => {
+      const node = ref.current;
+      if (node) {
+        node.addEventListener('mouseover', handleMouseOver);
+        node.addEventListener('mouseout', handleMouseOut);
+      }
+      return () => {
+        node.removeEventListener('mouseover', handleMouseOver);
+        node.removeEventListener('mouseout', handleMouseOut);
+      };
+    },
+    [ref.current] // Recall only if ref changes
+  );
+  return [ref, value];
 }
