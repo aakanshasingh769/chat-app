@@ -1,22 +1,21 @@
 import React, { memo } from 'react';
 import { useParams } from 'react-router';
-import { Alert, Button, Drawer } from 'rsuite';
-import { useMediaQuery, useModalState } from '../../../misc/custom-hooks';
-import EditableInput from '../../EditableInput';
+import { Alert, Button, Drawer, Icon } from 'rsuite';
 import { useCurrentRoom } from '../../../context/current-room.context';
+import { useMediaQuery, useModalState } from '../../../misc/custom-hooks';
 import { database } from '../../../misc/firebase';
+import EditableInput from '../../EditableInput';
 
 const EditRoomBtnDrawer = () => {
-  const { isOpen, close, open } = useModalState();
-  const { chatId } = useParams;
-  const isMobile = useMediaQuery('(max-width : 992px)');
+  const { isOpen, open, close } = useModalState();
+  const { chatId } = useParams();
 
   const name = useCurrentRoom(v => v.name);
   const description = useCurrentRoom(v => v.description);
 
   const updateData = (key, value) => {
     database
-      .ref(`rooms/${chatId}`)
+      .ref(`/rooms/${chatId}`)
       .child(key)
       .set(value)
       .then(() => {
@@ -26,18 +25,19 @@ const EditRoomBtnDrawer = () => {
         Alert.error(err.message, 4000);
       });
   };
-
   const onNameSave = newName => {
     updateData('name', newName);
   };
+
   const onDescriptionSave = newDesc => {
     updateData('description', newDesc);
   };
 
+  const isMobile = useMediaQuery('(max-width: 992px)');
   return (
     <div>
       <Button className="br-circle" size="sm" color="red" onClick={open}>
-        A
+        <Icon icon="user" />
       </Button>
 
       <Drawer full={isMobile} show={isOpen} onHide={close} placement="right">
@@ -47,17 +47,17 @@ const EditRoomBtnDrawer = () => {
         <Drawer.Body>
           <EditableInput
             initialValue={name}
-            onSave={onNameSave}
-            label={<h6 className="mb-2">Name</h6>}
-            emptyMsg="Name can no be empty"
+            onSaveHandler={onNameSave}
+            label={<h6 className="mb-2"> Name </h6>}
+            emptyMsg="name can not be empty"
           />
-
           <EditableInput
             componentClass="textarea"
-            rows={5}
+            row={5}
             initialValue={description}
-            onSave={onDescriptionSave}
-            emptyMsg="Description can not be empty"
+            onSaveHandler={onDescriptionSave}
+            label={<h6 className="mb-2"> Description </h6>}
+            emptyMsg="description can not be empty"
             wrapperClassName="mt-3"
           />
         </Drawer.Body>

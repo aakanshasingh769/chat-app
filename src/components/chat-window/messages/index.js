@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+/* eslint-disable consistent-return */
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams } from 'react-router';
-import { auth, database, storage } from '../../../misc/firebase';
-import { groupBy, transformToArrWithId } from '../../../misc/helpers';
-import MessageItem from './MessageItem';
 import { Alert, Button } from 'rsuite';
+import { groupBy, transformIntoArray } from '../../../misc/helper';
+import MessageItem from './MessageItem';
+import { auth, database, storage } from '../../../misc/firebase';
 
 const PAGE_SIZE = 15;
 const messagesRef = database.ref('/messages');
@@ -11,9 +12,9 @@ const messagesRef = database.ref('/messages');
 function shouldScrollToBottom(node, threshold = 30) {
   const percentage =
     (100 * node.scrollTop) / (node.scrollHeight - node.clientHeight) || 0;
+
   return percentage > threshold;
 }
-
 const Messages = () => {
   const { chatId } = useParams();
   const [messages, setMessages] = useState(null);
@@ -33,15 +34,15 @@ const Messages = () => {
         .equalTo(chatId)
         .limitToLast(limitToLast || PAGE_SIZE)
         .on('value', snap => {
-          const data = transformToArrWithId(snap.val());
+          const data = transformIntoArray(snap.val());
 
           setMessages(data);
-
           if (shouldScrollToBottom(node)) {
             node.scrollTop = node.scrollHeight;
           }
         });
-      setLimit(p => p + PAGE_SIZE);
+
+      setLimit(prev => prev + PAGE_SIZE);
     },
     [chatId]
   );
@@ -54,8 +55,9 @@ const Messages = () => {
 
     setTimeout(() => {
       const newHeight = node.scrollHeight;
+
       node.scrollTop = newHeight - oldHeight;
-    }, 200);
+    }, 180);
   }, [loadMessages, limit]);
 
   useEffect(() => {
@@ -65,7 +67,8 @@ const Messages = () => {
 
     setTimeout(() => {
       node.scrollTop = node.scrollHeight;
-    }, 200);
+    }, 190);
+
     return () => {
       messagesRef.off('value');
     };
@@ -73,25 +76,24 @@ const Messages = () => {
 
   const handleAdmin = useCallback(
     async uid => {
-      const adminsRef = database.ref(`/rooms/${chatId}/admins`);
+      const adminRef = database.ref(`/rooms/${chatId}/admins`);
 
-      let alertMsg;
+      let alertMessage;
 
-      await adminsRef.transaction(admins => {
+      await adminRef.transaction(admins => {
         if (admins) {
           if (admins[uid]) {
             admins[uid] = null;
-
-            alertMsg = 'Admin permission removed';
+            alertMessage = 'Admin permission removed';
           } else {
             admins[uid] = true;
-
-            alertMsg = 'Admin permission granted';
+            alertMessage = 'Admin permission granted';
           }
         }
         return admins;
       });
-      Alert.info(alertMsg, 4000);
+
+      Alert.info(alertMessage, 4000);
     },
     [chatId]
   );
@@ -100,39 +102,43 @@ const Messages = () => {
     const { uid } = auth.currentUser;
     const messageRef = database.ref(`/messages/${msgId}`);
 
-    let alertMsg;
+    let alertMessage;
 
     await messageRef.transaction(msg => {
       if (msg) {
         if (msg.likes && msg.likes[uid]) {
-          msg.likeCount -= 1;
+          msg.likeCount--;
           msg.likes[uid] = null;
-
-          alertMsg = 'Like removed';
+          alertMessage = 'Unliked';
         } else {
-          msg.likeCount += 1;
+          msg.likeCount++;
 
           if (!msg.likes) {
             msg.likes = {};
           }
 
           msg.likes[uid] = true;
-          alertMsg = 'Like added';
+          alertMessage = 'Liked <3';
         }
       }
       return msg;
     });
-    Alert.info(alertMsg, 4000);
+
+    Alert.info(alertMessage, 4000);
   }, []);
 
+  // Delete message function
   const handleDelete = useCallback(
     async (msgId, file) => {
-      if (!window.confirm('Delete this message ?')) {
+      // eslint-disable-next-line no-alert
+      if (!window.confirm('Delete this message?')) {
         return;
       }
-      const isLast = messages[messages.length - 1].id === msgId;
 
+      const isLast = messages[messages.length - 1].id === msgId;
       const updates = {};
+
+      // delete the original message
       updates[`/messages/${msgId}`] = null;
 
       if (isLast && messages.length > 1) {
@@ -149,30 +155,32 @@ const Messages = () => {
       try {
         await database.ref().update(updates);
         Alert.info('Message has been deleted');
-      } catch (err) {
-        return Alert.error(err.message);
+      } catch (error) {
+        return Alert.error(error.message);
       }
 
       if (file) {
         try {
           const fileRef = storage.refFromURL(file.url);
-          await fileRef.delete();
-        } catch (err) {
-          Alert.error(err.message);
+          fileRef.delete();
+        } catch (error) {
+          Alert.error(error.message);
         }
       }
     },
     [chatId, messages]
   );
+
   const renderMessages = () => {
     const groups = groupBy(messages, item =>
       new Date(item.createdAt).toDateString()
     );
 
     const items = [];
+
     Object.keys(groups).forEach(date => {
       items.push(
-        <li key={date} className="text-center mb-1 padded">
+        <li key={date} className="text-center mb-1 padded bg-black-01">
           {date}
         </li>
       );
@@ -186,11 +194,11 @@ const Messages = () => {
           handleDelete={handleDelete}
         />
       ));
+
       items.push(...msgs);
     });
     return items;
   };
-
   return (
     <ul ref={selfRef} className="msg-list custom-scroll">
       {messages && messages.length >= PAGE_SIZE && (
@@ -200,7 +208,7 @@ const Messages = () => {
           </Button>
         </li>
       )}
-      {isChatEmpty && <li>No messages yet</li>}
+      {isChatEmpty && <li>No Messages yet</li>}
       {canShowMessages && renderMessages()}
     </ul>
   );

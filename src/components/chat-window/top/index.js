@@ -1,19 +1,21 @@
 import React, { memo } from 'react';
 import { Link } from 'react-router-dom';
-import { useCurrentRoom } from '../../../context/current-room.context';
 import { ButtonToolbar, Icon } from 'rsuite';
+import { useCurrentRoom } from '../../../context/current-room.context';
 import { useMediaQuery } from '../../../misc/custom-hooks';
-import RoomInfoBtnModal from './RoomInfoBtnModal';
 import EditRoomBtnDrawer from './EditRoomBtnDrawer';
+import RoomInfoBtnModal from './RoomInfoBtnModal';
 
 const Top = () => {
+  // current-room-context
   const name = useCurrentRoom(v => v.name);
+  const description = useCurrentRoom(v => v.description);
   const isAdmin = useCurrentRoom(v => v.isAdmin);
-  const isMobile = useMediaQuery('(max-width : 992px)');
-
+  const isMobile = useMediaQuery('(max-width: 992px)');
+  // name = room name
   return (
     <div>
-      <div className="d-flex justify-content-between align-items-center">
+      <div className="d-flex justify-content-between align-items-center text-white">
         <h4 className="text-disappear d-flex align-items-center">
           <Icon
             componentClass={Link}
@@ -26,15 +28,15 @@ const Top = () => {
                 : 'd-none'
             }
           />
-          <span className="text-disappear">{name}</span>
+          <span className="text-disappear"> {name} </span>
         </h4>
 
         <ButtonToolbar className="ws-nowrap">
           {isAdmin && <EditRoomBtnDrawer />}
         </ButtonToolbar>
       </div>
-      <div className="d-flex justify-content-between align-items-center">
-        <span>todo</span>
+      <div className="d-flex justify-content-between align-items-center text-white">
+        <span className="text-wrap"> {description} </span>
         <RoomInfoBtnModal />
       </div>
     </div>

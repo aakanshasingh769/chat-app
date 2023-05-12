@@ -1,22 +1,21 @@
 import React, { useCallback } from 'react';
-import { Button, Drawer, Icon, Alert } from 'rsuite';
-import { useMediaQuery, useModalState } from '../../misc/custom-hooks';
-import Dashboard from '.';
-import { auth } from '../../misc/firebase';
+import { Alert, Button, Drawer, Icon, IconButton } from 'rsuite';
 import { isOfflineForDatabase } from '../../context/profile.context';
-import { database } from '../../misc/firebase';
+import { useMediaQuery, useModalState } from '../../misc/custom-hooks';
+import { auth, database } from '../../misc/firebase';
+import Dashboard from './Index';
 
 const DashboardToggle = () => {
   const { isOpen, open, close } = useModalState();
-  const isMobile = useMediaQuery('(max-width : 992px)');
+  const isMobile = useMediaQuery('(max-width: 992px)');
 
-  const onSignOut = useCallback(() => {
+  const onSignOutHandler = useCallback(() => {
     database
-      .ref(`/status/${auth.currentUser.uid}`)
+      .ref(`status/${auth.currentUser.uid}`)
       .set(isOfflineForDatabase)
       .then(() => {
         auth.signOut();
-        Alert.info('Signed out', 4000);
+        Alert.info('Sign Out');
         close();
       })
       .catch(err => {
@@ -26,12 +25,21 @@ const DashboardToggle = () => {
 
   return (
     <>
-      <Button block color="blue" onClick={open}>
-        <Icon icon="dashboard" />
+      {/* <Button block color="blue" onClick={open}> */}
+      {/* <Icon icon="dashboard" /> Dashboard */}
+      <IconButton
+        block
+        color="blue"
+        onClick={open}
+        icon={<Icon icon="dashboard" />}
+        appearance="primary"
+        active
+      >
         Dashboard
-      </Button>
+      </IconButton>
+      {/* </Button> */}
       <Drawer full={isMobile} show={isOpen} onHide={close} placement="left">
-        <Dashboard onSignOut={onSignOut} />
+        <Dashboard onSignOutHandler={onSignOutHandler} />
       </Drawer>
     </>
   );
