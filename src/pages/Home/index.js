@@ -1,15 +1,14 @@
 import React from 'react';
+import { Route, Switch, useRouteMatch } from 'react-router';
 import { Col, Grid, Row } from 'rsuite';
 import Sidebar from '../../components/Sidebar';
 import { RoomsProvider } from '../../context/rooms.context';
-import { Switch, Route, useRouteMatch } from 'react-router';
-import Chat from './Chat';
 import { useMediaQuery } from '../../misc/custom-hooks';
+import Chat from './Chat';
 
 const Home = () => {
-  const isDesktop = useMediaQuery('(min-width : 992px)');
+  const isDesktop = useMediaQuery('(min-width: 992px)');
   const { isExact } = useRouteMatch();
-
   const canRenderSidebar = isDesktop || isExact;
 
   return (
@@ -21,6 +20,7 @@ const Home = () => {
               <Sidebar />
             </Col>
           )}
+
           <Switch>
             <Route exact path="/chat/:chatId">
               <Col xs={24} md={16} className="h-100">

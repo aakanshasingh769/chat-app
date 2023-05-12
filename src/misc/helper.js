@@ -1,17 +1,18 @@
+// Initial Names
 export function getNameInitials(name) {
-  const splitName = name.toUpperCase().split('');
+  const splitname = name.toUpperCase().split(' ');
 
-  if (splitName.length > 1) {
-    return splitName[0][0] + splitName[1][0];
+  // If name word is > 1
+  if (splitname.length > 1) {
+    return splitname[0][0] + splitname[1][0]; // Puja Sharma return P+S
   }
-  return splitName[0][0];
+
+  // if name word == 1
+  return splitname[0][0];
 }
 
-export function transformToArr(snapVal) {
-  return snapVal ? Object.keys(snapVal) : [];
-}
-
-export function transformToArrWithId(snapVal) {
+// Transform it into an Array
+export function transformIntoArray(snapVal) {
   return snapVal
     ? Object.keys(snapVal).map(roomId => {
         return { ...snapVal[roomId], id: roomId };
@@ -25,7 +26,7 @@ export async function getUserUpdates(userId, keyToUpdate, value, db) {
   updates[`/profiles/${userId}/${keyToUpdate}`] = value;
 
   const getMsgs = db
-    .ref('/messages')
+    .ref(`/messages`)
     .orderByChild('author/uid')
     .equalTo(userId)
     .once('value');
@@ -49,6 +50,12 @@ export async function getUserUpdates(userId, keyToUpdate, value, db) {
   return updates;
 }
 
+// transform Object into an Array
+export function transformToArray(snapVal) {
+  return snapVal ? Object.keys(snapVal) : [];
+}
+
+// Grouping
 export function groupBy(array, groupingKeyFn) {
   return array.reduce((result, item) => {
     const groupingKey = groupingKeyFn(item);
@@ -56,18 +63,9 @@ export function groupBy(array, groupingKeyFn) {
     if (!result[groupingKey]) {
       result[groupingKey] = [];
     }
+
     result[groupingKey].push(item);
 
     return result;
-  }, []);
+  }, {});
 }
-
-export const isLocalhost = Boolean(
-  window.location.hostname === 'localhost' ||
-    // [::1] is the IPv6 localhost address.
-    window.location.hostname === '[::1]' ||
-    // 127.0.0.0/8 are considered localhost for IPv4.
-    window.location.hostname.match(
-      /^127(?:\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$/
-    )
-);

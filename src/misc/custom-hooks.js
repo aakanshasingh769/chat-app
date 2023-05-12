@@ -1,15 +1,25 @@
-import { useCallback, useState, useEffect } from 'react';
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useState, useCallback, useEffect } from 'react';
 import { database } from './firebase';
 import { useRef } from 'react';
 
+// Sidebar Modal hooks
 export function useModalState(defaultValue = false) {
   const [isOpen, setIsOpen] = useState(defaultValue);
-  const open = useCallback(() => setIsOpen(true), []);
-  const close = useCallback(() => setIsOpen(false), []);
+
+  const open = useCallback(() => {
+    setIsOpen(true);
+  }, []);
+
+  const close = useCallback(() => {
+    setIsOpen(false);
+  }, []);
 
   return { isOpen, open, close };
 }
 
+// Responsive Modal hooks
+// const is992px = useMediaQuery('(max-width: 992px)')
 export const useMediaQuery = query => {
   const [matches, setMatches] = useState(
     () => window.matchMedia(query).matches
@@ -41,6 +51,7 @@ export function usePresence(uid) {
         setPresence(data);
       }
     });
+
     return () => {
       userStatusRef.off();
     };
@@ -49,6 +60,7 @@ export function usePresence(uid) {
   return presence;
 }
 
+// Hook Hover
 export function useHover() {
   const [value, setValue] = useState(false);
   const ref = useRef(null);

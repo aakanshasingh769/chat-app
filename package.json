@@ -30,9 +30,7 @@
     "lint": "eslint src/**/*.js",
     "format": "prettier --write src/**/*.js",
     "formatlint": "npm run format && npm run lint",
-    "clear": "rimraf build",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "clear": "rimraf build"
   },
   "eslintConfig": {
     "extends": [

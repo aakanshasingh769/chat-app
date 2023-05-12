@@ -27,6 +27,7 @@ export const ProfileProvider = ({ children }) => {
       if (authObj) {
         userStatusRef = database.ref(`/status/${authObj.uid} `);
         userRef = database.ref(`/profiles/${authObj.uid}`);
+        userStatusRef = database.ref(`/status/${authObj.uid}`);
         userRef.on('value', snap => {
           const { name, createdAt, avatar } = snap.val();
 
@@ -43,7 +44,9 @@ export const ProfileProvider = ({ children }) => {
         });
 
         database.ref('.info/connected').on('value', snapshot => {
+          // If we're not currently connected, don't do anything.
           if (!!snapshot.val() === false) {
+            // !! added to convert it into a boolean completely
             return;
           }
 
@@ -99,6 +102,8 @@ export const ProfileProvider = ({ children }) => {
         setIsLoading(false);
       }
     });
+
+    // Clean up function
     return () => {
       authUnSub();
 
