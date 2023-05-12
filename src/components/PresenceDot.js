@@ -1,14 +1,15 @@
 import React from 'react';
+import { Badge, Tooltip, Whisper } from 'rsuite';
 import { usePresence } from '../misc/custom-hooks';
-import { Whisper, Tooltip, Badge } from 'rsuite';
 
 const getColor = presence => {
   if (!presence) {
     return 'gray';
   }
+
   switch (presence.state) {
     case 'online':
-      return 'green';
+      return 'rgb(17, 255, 17)';
     case 'offline':
       return 'red';
     default:
@@ -25,7 +26,6 @@ const getText = presence => {
     ? 'Online'
     : `Last online ${new Date(presence.last_changed).toLocaleDateString()}`;
 };
-
 const PresenceDot = ({ uid }) => {
   const presence = usePresence(uid);
 
@@ -36,7 +36,7 @@ const PresenceDot = ({ uid }) => {
       speaker={<Tooltip>{getText(presence)}</Tooltip>}
     >
       <Badge
-        className="cursor-pointer"
+        className="cursor-pointer mr-1"
         style={{ backgroundColor: getColor(presence) }}
       />
     </Whisper>

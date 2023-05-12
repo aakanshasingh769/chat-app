@@ -1,29 +1,28 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Divider } from 'rsuite';
-import DashboardToggle from './dashboard/DashboardToggle';
 import CreateRoomBtnModal from './CreateRoomBtnModal';
+import DashboardToggle from './dashboard/DashboardToggle';
 import ChatRoomList from './rooms/ChatRoomList';
-import { useState } from 'react';
-import { useEffect } from 'react';
 
 const Sidebar = () => {
   const topSidebarRef = useRef();
-  const [height, setHeight] = useState(0);
+  const [height, setHeight] = useState();
 
   useEffect(() => {
     if (topSidebarRef.current) {
       setHeight(topSidebarRef.current.scrollHeight);
     }
-  }, []);
-
+  }, [topSidebarRef]);
   return (
-    <div className="h-100  pt-2">
+    <div className="h-100 pt-2 bg-c-grey ">
       <div ref={topSidebarRef}>
         <DashboardToggle />
         <CreateRoomBtnModal />
-        <Divider>Join conversation</Divider>
+        <Divider style={{ margin: 0, padding: '30px 0' }}>
+          Join conversation
+        </Divider>
       </div>
-      <ChatRoomList aboveElHeight={height} />
+      <ChatRoomList aboveHeight={height} />
     </div>
   );
 };

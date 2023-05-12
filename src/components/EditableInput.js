@@ -1,36 +1,38 @@
-import React, { useState, useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Alert, Icon, Input, InputGroup } from 'rsuite';
 
 const EditableInput = ({
   initialValue,
-  onSave,
+  onSaveHandler,
   label = null,
   placeholder = 'Write your value',
-  emptyMsg = 'Input is empty',
-  wrapperClassName = ' ',
-  ...inputProps
+  emptyMsg = 'Input is Empty',
+  wrapperClassName = '',
+  ...restInputProps
 }) => {
   const [input, setInput] = useState(initialValue);
   const [isEditable, setIsEditable] = useState(false);
 
-  const onInputChange = useCallback(value => {
+  // Input value change handler
+  const inputChangeHandler = useCallback(value => {
     setInput(value);
   }, []);
 
-  const onEditClick = useCallback(() => {
-    setIsEditable(p => !p);
-    setInput(initialValue);
+  // Input value on editing mode
+  const onEditClickHandler = useCallback(() => {
+    setIsEditable(prev => !prev); // toggle between true and false
+    setInput(initialValue); // If cancelled set it to Initial Value
   }, [initialValue]);
 
-  const onSaveClick = async () => {
-    const trimmed = input.trim();
-
+  // Input on save
+  const onSaveClickHandler = async () => {
+    const trimmed = input.trim(); // Remove left & right white space
     if (trimmed === '') {
-      Alert.info(emptyMsg, 4000);
+      Alert.info({ emptyMsg });
     }
 
     if (trimmed !== initialValue) {
-      await onSave(trimmed);
+      await onSaveHandler(input); // onSaveHandler is in Dashboard passing saved value
     }
     setIsEditable(false);
   };
@@ -40,17 +42,17 @@ const EditableInput = ({
       {label}
       <InputGroup>
         <Input
-          {...inputProps}
+          {...restInputProps}
           disabled={!isEditable}
           placeholder={placeholder}
           value={input}
-          onChange={onInputChange}
+          onChange={inputChangeHandler}
         />
-        <InputGroup.Button onClick={onEditClick}>
+        <InputGroup.Button onClick={onEditClickHandler}>
           <Icon icon={isEditable ? 'close' : 'edit2'} />
         </InputGroup.Button>
         {isEditable && (
-          <InputGroup.Button onClick={onSaveClick}>
+          <InputGroup.Button onClick={onSaveClickHandler}>
             <Icon icon="check" />
           </InputGroup.Button>
         )}
