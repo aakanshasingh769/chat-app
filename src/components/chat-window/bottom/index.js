@@ -1,7 +1,7 @@
-import React, { useCallback, useState } from 'react';
+import React, { useState, useCallback } from 'react';
+import { useParams } from 'react-router';
 import { Alert, Icon, Input, InputGroup } from 'rsuite';
 import firebase from 'firebase/app';
-import { useParams } from 'react-router';
 import { useProfile } from '../../../context/profile.context';
 import { database } from '../../../misc/firebase';
 import AttachmentBtnModal from './AttachmentBtnModal';
@@ -16,7 +16,6 @@ function assembleMessage(profile, chatId) {
       createdAt: profile.createdAt,
       ...(profile.avatar ? { avatar: profile.avatar } : {}),
     },
-
     createdAt: firebase.database.ServerValue.TIMESTAMP,
     likeCount: 0,
   };
@@ -25,16 +24,16 @@ function assembleMessage(profile, chatId) {
 const Bottom = () => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-
   const { chatId } = useParams();
   const { profile } = useProfile();
 
-  const onInputChange = useCallback(value => {
+  const onInputChangeHandler = useCallback(value => {
     setInput(value);
   }, []);
 
-  const onSendClick = async () => {
+  const onSendClickHandler = async () => {
     if (input.trim() === '') {
+      Alert.warning('Please enter a message');
       return;
     }
 
@@ -43,7 +42,7 @@ const Bottom = () => {
 
     const updates = {};
 
-    const messageId = database.ref('messages').push().key;
+    const messageId = database.ref('messages').push().key; // we will get unique key in real time database
 
     updates[`/messages/${messageId}`] = msgData;
     updates[`/rooms/${chatId}/lastMessage`] = {
@@ -54,32 +53,31 @@ const Bottom = () => {
     setIsLoading(true);
     try {
       await database.ref().update(updates);
-
+      setIsLoading(false);
       setInput('');
+    } catch (error) {
       setIsLoading(false);
-    } catch (err) {
-      setIsLoading(false);
-      Alert.error(err.message);
+      Alert.error(error.message, 10000);
     }
   };
-
-  const onKeyDown = ev => {
+  const onKeyDownHandler = ev => {
     if (ev.keyCode === 13) {
       ev.preventDefault();
-      onSendClick();
+      onSendClickHandler();
     }
   };
 
   const afterUpload = useCallback(
     async files => {
+      // put file in db
       setIsLoading(true);
 
       const updates = {};
+
       files.forEach(file => {
         const msgData = assembleMessage(profile, chatId);
         msgData.file = file;
-
-        const messageId = database.ref('messages').push().key;
+        const messageId = database.ref('messages').push().key; // we will get unique key in real time database
 
         updates[`/messages/${messageId}`] = msgData;
       });
@@ -90,12 +88,13 @@ const Bottom = () => {
         ...updates[lastMsgId],
         msgId: lastMsgId,
       };
+
       try {
         await database.ref().update(updates);
         setIsLoading(false);
-      } catch (err) {
+      } catch (error) {
         setIsLoading(false);
-        Alert.error(err.message);
+        Alert.error(error.message, 10000);
       }
     },
     [chatId, profile]
@@ -107,16 +106,16 @@ const Bottom = () => {
         <AttachmentBtnModal afterUpload={afterUpload} />
         <AudioMsgBtn afterUpload={afterUpload} />
         <Input
-          placeholder="Write a new message here..."
+          type="text"
+          placeholder="Message"
           value={input}
-          onChange={onInputChange}
-          onKeyDown={onKeyDown}
+          onChange={onInputChangeHandler}
+          onKeyDown={onKeyDownHandler}
         />
-
         <InputGroup.Button
           color="blue"
           appearance="primary"
-          onClick={onSendClick}
+          onClick={onSendClickHandler}
           disabled={isLoading}
         >
           <Icon icon="send" />

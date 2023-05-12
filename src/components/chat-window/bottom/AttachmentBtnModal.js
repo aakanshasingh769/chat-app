@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { useModalState } from '../../../misc/custom-hooks';
-import { Button, Icon, InputGroup, Modal, Uploader } from 'rsuite';
 import { useParams } from 'react-router';
+import { Alert, Button, Icon, InputGroup, Modal, Uploader } from 'rsuite';
+import { useModalState } from '../../../misc/custom-hooks';
 import { storage } from '../../../misc/firebase';
 
 const MAX_FILE_SIZE = 1000 * 1024 * 5;
@@ -9,11 +9,11 @@ const MAX_FILE_SIZE = 1000 * 1024 * 5;
 const AttachmentBtnModal = ({ afterUpload }) => {
   const { chatId } = useParams();
   const { isOpen, close, open } = useModalState();
-  const [fileList, setFileList] = useState([]);
 
+  const [fileList, setFileList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const onChange = fileArr => {
+  const onChangeHandler = fileArr => {
     const filtered = fileArr
       .filter(el => el.blobFile.size <= MAX_FILE_SIZE)
       .slice(0, 5);
@@ -27,7 +27,7 @@ const AttachmentBtnModal = ({ afterUpload }) => {
           .ref(`/chat/${chatId}`)
           .child(Date.now() + f.name)
           .put(f.blobFile, {
-            cacheControl: `public , max-age=${3600 * 24 * 3}`,
+            cacheControl: `public, max-age=${3600 * 24 * 3}`,
           });
       });
 
@@ -47,9 +47,9 @@ const AttachmentBtnModal = ({ afterUpload }) => {
 
       setIsLoading(false);
       close();
-    } catch (err) {
+    } catch (error) {
       setIsLoading(false);
-      Alert.error(err.message);
+      Alert.error(error.message);
     }
   };
 
@@ -58,7 +58,6 @@ const AttachmentBtnModal = ({ afterUpload }) => {
       <InputGroup.Button onClick={open}>
         <Icon icon="attachment" />
       </InputGroup.Button>
-
       <Modal show={isOpen} onHide={close}>
         <Modal.Header>
           <Modal.Title>Upload files</Modal.Title>
@@ -67,8 +66,8 @@ const AttachmentBtnModal = ({ afterUpload }) => {
           <Uploader
             autoUpload={false}
             action=""
-            fileList={fileList}
-            onChange={onChange}
+            fijeList={fileList}
+            onChange={onChangeHandler}
             multiple
             listType="picture-text"
             className="w-100"
@@ -80,7 +79,7 @@ const AttachmentBtnModal = ({ afterUpload }) => {
             Send to chat
           </Button>
           <div className="text-right mt-2">
-            <small>* only files less than 5 mb are allowed</small>
+            <small>* only files less than 5mb are allowed</small>
           </div>
         </Modal.Footer>
       </Modal>
